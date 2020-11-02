@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Emoji;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EmojiController extends Controller
 {
@@ -13,7 +15,8 @@ class EmojiController extends Controller
      */
     public function index()
     {
-        dd("ciao");
+        $emoji = Emoji::all();
+        return view('emoji.index', compact('emoji'));
     }
 
     /**
@@ -23,7 +26,7 @@ class EmojiController extends Controller
      */
     public function create()
     {
-        //
+        return view('emoji.create');
     }
 
     /**
@@ -34,7 +37,20 @@ class EmojiController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $data = $request->all();
+        $request->validate([
+            'slug' => "required",
+            'character' => "required",
+            'unicodeName' => "required|unique:emoji|max:100",
+            'codePoint' => "required|unique:emoji",
+            'group' => "required|max:100",
+            'subGroup' => "required|max:100",
+        ]);
+        $newEmoji = new Emoji;
+        $newEmoji->fill($data);
+        $newEmoji->save();
+        
+        return redirect()->route('emoji.show', $newEmoji->id);
     }
 
     /**
@@ -45,7 +61,8 @@ class EmojiController extends Controller
      */
     public function show($id)
     {
-        //
+        $emoji = Emoji::find($id);
+        return view('emoji.show', compact('emoji'));
     }
 
     /**
@@ -54,9 +71,9 @@ class EmojiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Emoji $emoji)
     {
-        //
+        return view('emoji.edit', compact('emoji'));
     }
 
     /**
@@ -66,9 +83,29 @@ class EmojiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Emoji $emoji)
     {
-        //
+        $data = $request->all();
+        $request->validate([
+            'slug' => "required",
+            'character' => "required",
+            "unicodeName"=> [
+                "required",
+                "max:100",
+                Rule::unique('emoji')->ignore($emoji),
+            ],
+            "codePoint"=> [
+                "required",
+                "max:15",
+                Rule::unique('emoji')->ignore($emoji),
+            ],
+            'group' => "required|max:100",
+            'subGroup' => "required|max:100",
+        ]);
+
+        $emoji->update($data);
+        
+        return redirect()->route('emoji.show', $emoji);
     }
 
     /**
@@ -77,8 +114,9 @@ class EmojiController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Emoji $emoji)
     {
-        //
+        $emoji->delete();
+        return redirect()->route('emoji.index');
     }
 }
