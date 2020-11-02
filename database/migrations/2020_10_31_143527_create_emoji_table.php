@@ -15,6 +15,12 @@ class CreateEmojiTable extends Migration
     {
         Schema::create('emoji', function (Blueprint $table) {
             $table->id();
+            $table->string('slug')->unique();
+            $table->string('character');
+            $table->string('unicodeName', 100)->unique();
+            $table->string('codePoint')->unique();
+            $table->string('group', 100);
+            $table->string('subGroup', 100);
             $table->timestamps();
         });
     }
