@@ -1,4 +1,5 @@
 @extends('layout.layout')
+@dd($article)
 @section('main')
     <h2>Edit Emoticon</h2>
     <form action="{{route('emoji.update', $emoji)}}" method="POST">
